@@ -451,8 +451,30 @@ export default function GameCanvas({ level, character, background, hearts: initH
     }
   };
 
+  const isMobile = useIsMobile();
+
+  const touchStart = (key: 'up' | 'down' | 'left' | 'right') => {
+    stateRef.current.keys[key] = true;
+  };
+  const touchEnd = (key: 'up' | 'down' | 'left' | 'right') => {
+    stateRef.current.keys[key] = false;
+  };
+
+  const DPadButton = ({ label, dir, className }: { label: string; dir: 'up' | 'down' | 'left' | 'right'; className?: string }) => (
+    <button
+      className={`w-16 h-16 rounded-2xl bg-primary/30 border-2 border-primary/50 text-foreground text-2xl font-bold flex items-center justify-center active:bg-primary/60 select-none touch-none ${className ?? ''}`}
+      onTouchStart={(e) => { e.preventDefault(); touchStart(dir); }}
+      onTouchEnd={(e) => { e.preventDefault(); touchEnd(dir); }}
+      onMouseDown={() => touchStart(dir)}
+      onMouseUp={() => touchEnd(dir)}
+      onMouseLeave={() => touchEnd(dir)}
+    >
+      {label}
+    </button>
+  );
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-2 gap-3">
       <canvas
         ref={canvasRef}
         width={CW}
@@ -460,6 +482,28 @@ export default function GameCanvas({ level, character, background, hearts: initH
         className="rounded-2xl border-2 border-border shadow-2xl max-w-full"
         style={{ imageRendering: 'auto' }}
       />
+      {isMobile && (
+        <div className="flex items-center gap-8 pb-2">
+          {/* Left side: Up/Down */}
+          <div className="flex flex-col items-center gap-1">
+            <DPadButton label="▲" dir="up" />
+            <DPadButton label="▼" dir="down" />
+          </div>
+          {/* Right side: Left/Right */}
+          <div className="flex items-center gap-1">
+            <DPadButton label="◀" dir="left" />
+            <DPadButton label="▶" dir="right" />
+          </div>
+          {/* Pause button */}
+          <button
+            className="w-12 h-12 rounded-xl bg-muted border-2 border-border text-muted-foreground text-lg font-bold flex items-center justify-center active:bg-accent select-none touch-none"
+            onTouchStart={(e) => { e.preventDefault(); onPause(); }}
+            onClick={onPause}
+          >
+            ⏸
+          </button>
+        </div>
+      )}
     </div>
   );
 }
