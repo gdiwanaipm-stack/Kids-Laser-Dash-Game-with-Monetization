@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsTouchDevice } from '@/hooks/use-mobile';
 import { Character, Background, CHARACTER_EMOJI, LEVEL_CONFIGS, BG_COLORS } from '@/lib/gameTypes';
 import { playCollect, playHit, playWin } from '@/lib/gameAudio';
 
