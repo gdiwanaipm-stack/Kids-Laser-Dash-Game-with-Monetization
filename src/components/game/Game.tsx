@@ -1,0 +1,216 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Character, Background, Screen, BACKGROUNDS, CHARACTER_EMOJI, CHARACTER_NAMES, shuffleArray, GameSave } from '@/lib/gameTypes';
+import { playSelect, playWin } from '@/lib/gameAudio';
+import CharacterSelect from './CharacterSelect';
+import GameStore from './GameStore';
+import GameCanvas from './GameCanvas';
+
+const SAVE_KEY = 'track-racer-save';
+
+function loadSave(): GameSave | null {
+  try {
+    const d = localStorage.getItem(SAVE_KEY);
+    return d ? JSON.parse(d) : null;
+  } catch { return null; }
+}
+
+function saveSave(s: GameSave) {
+  localStorage.setItem(SAVE_KEY, JSON.stringify(s));
+}
+
+function clearSave() {
+  localStorage.removeItem(SAVE_KEY);
+}
+
+export default function Game() {
+  const [screen, setScreen] = useState<Screen>('title');
+  const [character, setCharacter] = useState<Character | null>(null);
+  const [level, setLevel] = useState(1);
+  const [gems, setGems] = useState(0);
+  const [hearts, setHearts] = useState(1);
+  const [hasShield, setHasShield] = useState(false);
+  const [heartBought, setHeartBought] = useState(false);
+  const [shieldBought, setShieldBought] = useState(false);
+  const [backgrounds, setBackgrounds] = useState<Background[]>(() => shuffleArray([...BACKGROUNDS]));
+  const [hasSave, setHasSave] = useState(false);
+
+  useEffect(() => {
+    const s = loadSave();
+    if (s) setHasSave(true);
+  }, []);
+
+  const resumeGame = useCallback(() => {
+    const s = loadSave();
+    if (s) {
+      setCharacter(s.character);
+      setLevel(s.level);
+      setGems(s.gems);
+      setBackgrounds(s.backgrounds);
+      setHearts(1);
+      setHasShield(false);
+      setHeartBought(false);
+      setShieldBought(false);
+      setScreen('store');
+    }
+  }, []);
+
+  const startNew = useCallback(() => {
+    clearSave();
+    setLevel(1);
+    setGems(0);
+    setHearts(1);
+    setHasShield(false);
+    setBackgrounds(shuffleArray([...BACKGROUNDS]));
+    setScreen('select');
+  }, []);
+
+  const handleCharacterSelect = useCallback((c: Character) => {
+    setCharacter(c);
+    setScreen('store');
+  }, []);
+
+  const handleLevelComplete = useCallback((gemsCollected: number) => {
+    const newGems = gems + gemsCollected + 10;
+    setGems(newGems);
+    if (level >= 5) {
+      setScreen('gameComplete');
+      clearSave();
+    } else {
+      setScreen('levelComplete');
+      // Save progress
+      saveSave({ character: character!, level: level + 1, gems: newGems, backgrounds });
+    }
+  }, [gems, level, character, backgrounds]);
+
+  const handleNextLevel = useCallback(() => {
+    setLevel((l) => l + 1);
+    setHearts(1);
+    setHasShield(false);
+    setHeartBought(false);
+    setShieldBought(false);
+    setScreen('store');
+  }, []);
+
+  const handlePause = useCallback(() => {
+    if (character) {
+      saveSave({ character, level, gems, backgrounds });
+    }
+    setScreen('paused');
+  }, [character, level, gems, backgrounds]);
+
+  const handleBuyHeart = useCallback(() => {
+    if (gems >= 20) { setGems((g) => g - 20); setHearts(2); setHeartBought(true); }
+  }, [gems]);
+
+  const handleBuyShield = useCallback(() => {
+    if (gems >= 30) { setGems((g) => g - 30); setHasShield(true); setShieldBought(true); }
+  }, [gems]);
+
+  // Title Screen
+  if (screen === 'title') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 bg-background">
+        <h1 className="game-title">Track Racer</h1>
+        <p className="text-xl text-muted-foreground text-center max-w-md">
+          Race through 5 epic levels, dodge deadly lasers, collect gems, and become the ultimate champion! 🏆
+        </p>
+        <div className="flex flex-col gap-4 mt-4">
+          <button onClick={() => { playSelect(); startNew(); }} className="game-btn">
+            🎮 New Game
+          </button>
+          {hasSave && (
+            <button onClick={() => { playSelect(); resumeGame(); }} className="game-btn-secondary">
+              ▶️ Continue
+            </button>
+          )}
+        </div>
+        <div className="mt-8 text-sm text-muted-foreground text-center space-y-1">
+          <p>⬆️ Accelerate &nbsp; ⬇️ Brake &nbsp; ⬅️➡️ Steer</p>
+          <p>ESC to Pause</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (screen === 'select') {
+    return <CharacterSelect onSelect={handleCharacterSelect} />;
+  }
+
+  if (screen === 'store') {
+    return (
+      <GameStore
+        gems={gems}
+        level={level}
+        onBuyHeart={handleBuyHeart}
+        onBuyShield={handleBuyShield}
+        onContinue={() => { playSelect(); setScreen('playing'); }}
+        heartBought={heartBought}
+        shieldBought={shieldBought}
+      />
+    );
+  }
+
+  if (screen === 'playing' && character) {
+    return (
+      <GameCanvas
+        level={level}
+        character={character}
+        background={backgrounds[level - 1]}
+        hearts={hearts}
+        hasShield={hasShield}
+        gems={gems}
+        onComplete={handleLevelComplete}
+        onPause={handlePause}
+      />
+    );
+  }
+
+  if (screen === 'paused') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 bg-background">
+        <h2 className="game-title text-4xl">⏸ Paused</h2>
+        <p className="text-muted-foreground">Level {level} • 💎 {gems} Gems</p>
+        <div className="flex flex-col gap-4">
+          <button onClick={() => { playSelect(); setScreen('playing'); }} className="game-btn">
+            ▶️ Resume
+          </button>
+          <button onClick={() => { playSelect(); setScreen('title'); }} className="game-btn-secondary">
+            🏠 Main Menu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (screen === 'levelComplete') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 bg-background">
+        <h2 className="game-title text-4xl">🎉 Level {level} Complete!</h2>
+        <div className="text-6xl float-animation">{CHARACTER_EMOJI[character!]}</div>
+        <p className="text-2xl text-accent font-bold">+10 Gems Earned! 💎</p>
+        <p className="text-lg text-muted-foreground">Total: 💎 {gems} Gems</p>
+        <button onClick={() => { playSelect(); handleNextLevel(); }} className="game-btn-accent">
+          ➡️ Next Level
+        </button>
+      </div>
+    );
+  }
+
+  if (screen === 'gameComplete') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 bg-background">
+        <h1 className="game-title">🏆 Champion!</h1>
+        <div className="text-8xl float-animation">{CHARACTER_EMOJI[character!]}</div>
+        <p className="text-2xl text-foreground font-bold">
+          You completed all 5 levels with {CHARACTER_NAMES[character!]}!
+        </p>
+        <p className="text-xl text-accent font-bold">💎 {gems} Total Gems</p>
+        <button onClick={() => { playSelect(); startNew(); }} className="game-btn">
+          🔄 Play Again
+        </button>
+      </div>
+    );
+  }
+
+  return null;
+}

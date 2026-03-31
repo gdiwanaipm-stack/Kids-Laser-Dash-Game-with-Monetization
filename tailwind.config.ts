@@ -57,6 +57,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        game: {
+          gem: "hsl(var(--game-gem))",
+          laser: "hsl(var(--game-laser))",
+          shield: "hsl(var(--game-shield))",
+          success: "hsl(var(--game-success))",
+          heart: "hsl(var(--game-heart))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
