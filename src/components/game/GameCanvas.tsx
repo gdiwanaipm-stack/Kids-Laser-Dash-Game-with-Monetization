@@ -451,7 +451,7 @@ export default function GameCanvas({ level, character, background, hearts: initH
     }
   };
 
-  const isMobile = useIsMobile();
+  const isMobile = useIsTouchDevice();
 
   const touchStart = (key: 'up' | 'down' | 'left' | 'right') => {
     stateRef.current.keys[key] = true;
