@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Character, Background, Screen, BACKGROUNDS, CHARACTER_EMOJI, CHARACTER_NAMES, shuffleArray, GameSave } from '@/lib/gameTypes';
 import { playSelect, playWin } from '@/lib/gameAudio';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import CharacterSelect from './CharacterSelect';
 import GameStore from './GameStore';
 import GameCanvas from './GameCanvas';
