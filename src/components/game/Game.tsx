@@ -7,7 +7,7 @@ import CharacterSelect from './CharacterSelect';
 import GameStore from './GameStore';
 import GameCanvas from './GameCanvas';
 
-const SAVE_KEY = 'track-racer-save';
+const SAVE_KEY = 'laser-dash-save';
 
 function loadSave(): GameSave | null {
   try {
