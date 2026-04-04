@@ -48,7 +48,7 @@ export default function GameCanvas({ level, character, background, hearts: initH
     keys: { up: false, down: false, left: false, right: false },
     hearts: initHearts,
     shieldActive: initShield,
-    shieldTimer: initShield ? 25 * 60 : 0, // frames (60fps * 25s)
+    shieldTimer: initShield ? 15 * 60 : 0, // frames (60fps * 15s)
     gemsCollected: 0,
     obstacles: [] as Obstacle[],
     gems: [] as GemItem[],
