@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Character, Background, Screen, BACKGROUNDS, CHARACTER_EMOJI, CHARACTER_NAMES, shuffleArray, GameSave } from '@/lib/gameTypes';
 import { playSelect, playWin } from '@/lib/gameAudio';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import CharacterSelect from './CharacterSelect';
 import GameStore from './GameStore';
 import GameCanvas from './GameCanvas';
@@ -23,6 +25,7 @@ function clearSave() {
 }
 
 export default function Game() {
+  const { user, signOut } = useAuth();
   const [screen, setScreen] = useState<Screen>('title');
   const [character, setCharacter] = useState<Character | null>(null);
   const [level, setLevel] = useState(1);
@@ -108,8 +111,24 @@ export default function Game() {
 
   // Title Screen
   if (screen === 'title') {
+    const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Racer';
+    const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 bg-background">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 bg-background relative">
+        {/* User info + sign out */}
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          {avatarUrl && (
+            <img src={avatarUrl} alt="" className="w-8 h-8 rounded-full border-2 border-primary" />
+          )}
+          <span className="text-sm text-muted-foreground">{displayName}</span>
+          <button
+            onClick={async () => { await signOut(); }}
+            className="text-xs px-3 py-1.5 rounded-xl bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
+
         <h1 className="game-title">Track Racer</h1>
         <p className="text-xl text-muted-foreground text-center max-w-md">
           Race through 5 epic levels, dodge deadly lasers, collect gems, and become the ultimate champion! 🏆
