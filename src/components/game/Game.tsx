@@ -54,10 +54,25 @@ export default function Game() {
   const [backgrounds, setBackgrounds] = useState<Background[]>(() => shuffleArray([...BACKGROUNDS]));
   const [hasSave, setHasSave] = useState(false);
 
+  // Load saved state from DB on mount
   useEffect(() => {
     const s = loadSave();
     if (s) setHasSave(true);
-  }, []);
+
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('gems, highest_level')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (data && !s) {
+            // If no local save, restore gems from DB
+            setGems(data.gems);
+          }
+        });
+    }
+  }, [user]);
 
   const resumeGame = useCallback(() => {
     const s = loadSave();
