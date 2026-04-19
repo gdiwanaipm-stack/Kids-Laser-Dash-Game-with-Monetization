@@ -212,6 +212,12 @@ export default function Game() {
         </div>
 
         <h1 className="game-title">Laser Dash</h1>
+        {unlocked && (
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/15 border border-accent/30 text-accent text-sm font-semibold">
+            <span aria-hidden>✓</span>
+            <span>Levels 3-5 unlocked</span>
+          </div>
+        )}
         <p className="text-xl text-muted-foreground text-center max-w-md">
           Race through 5 epic levels, dodge deadly lasers, collect gems, and become the ultimate champion! 🏆
         </p>
