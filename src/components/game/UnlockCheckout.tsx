@@ -29,7 +29,7 @@ export function UnlockCheckout({ userId, customerEmail, onClose }: Props) {
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-y-auto p-4">
       <div className="max-w-2xl mx-auto py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Unlock Levels 3-5 — $0.99 to charity</h2>
+          <h2 className="text-2xl font-bold text-foreground">Unlock Levels 3-5 — $0.99</h2>
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground text-sm px-3 py-1.5 rounded-xl bg-muted"
@@ -38,7 +38,7 @@ export function UnlockCheckout({ userId, customerEmail, onClose }: Props) {
           </button>
         </div>
         <p className="text-muted-foreground mb-6">
-          A one-time $0.99 payment unlocks the rest of the game forever. 100% goes to charity. 💛
+          A one-time $0.99 payment unlocks the rest of the game forever. Motivates and supports development. 💛
         </p>
         <div id="checkout" className="rounded-2xl overflow-hidden bg-card">
           <EmbeddedCheckoutProvider stripe={getStripe()} options={{ fetchClientSecret }}>
