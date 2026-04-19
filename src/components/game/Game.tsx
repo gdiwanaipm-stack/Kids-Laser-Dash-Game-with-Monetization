@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import CharacterSelect from './CharacterSelect';
 import GameStore from './GameStore';
 import GameCanvas from './GameCanvas';
+import { UnlockCheckout } from './UnlockCheckout';
+import { useUnlock } from '@/hooks/useUnlock';
 
 const SAVE_KEY = 'laser-dash-save';
 
@@ -43,6 +45,8 @@ async function syncProgressToDb(userId: string, gems: number, level: number) {
 
 export default function Game() {
   const { user, signOut } = useAuth();
+  const { unlocked, refresh: refreshUnlock } = useUnlock();
+  const [showCheckout, setShowCheckout] = useState(false);
   const [screen, setScreen] = useState<Screen>('title');
   const [character, setCharacter] = useState<Character | null>(null);
   const [level, setLevel] = useState(1);
@@ -73,6 +77,20 @@ export default function Game() {
         });
     }
   }, [user]);
+
+  // Handle return from Stripe checkout
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      const tryRefresh = (n = 0) => {
+        refreshUnlock();
+        if (n < 6) setTimeout(() => tryRefresh(n + 1), 1000);
+      };
+      tryRefresh();
+      window.history.replaceState({}, '', window.location.pathname);
+      setShowCheckout(false);
+    }
+  }, [refreshUnlock]);
 
   const resumeGame = useCallback(() => {
     const s = loadSave();
@@ -119,13 +137,18 @@ export default function Game() {
   }, [gems, level, character, backgrounds, user]);
 
   const handleNextLevel = useCallback(() => {
+    // Gate: after completing level 2, require unlock to play level 3+
+    if (level >= 2 && !unlocked) {
+      setShowCheckout(true);
+      return;
+    }
     setLevel((l) => l + 1);
     setHearts(1);
     setHasShield(false);
     setHeartBought(false);
     setShieldBought(false);
     setScreen('store');
-  }, []);
+  }, [level, unlocked]);
 
   const handlePause = useCallback(() => {
     if (character) {
@@ -142,6 +165,7 @@ export default function Game() {
     if (gems >= 30) { setGems((g) => g - 30); setHasShield(true); setShieldBought(true); }
   }, [gems]);
 
+  const renderScreen = () => {
   // Title Screen
   if (screen === 'title') {
     const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Racer';
@@ -265,4 +289,18 @@ export default function Game() {
   }
 
   return null;
+  };
+
+  return (
+    <>
+      {renderScreen()}
+      {showCheckout && user && (
+        <UnlockCheckout
+          userId={user.id}
+          customerEmail={user.email ?? undefined}
+          onClose={() => setShowCheckout(false)}
+        />
+      )}
+    </>
+  );
 }
