@@ -78,6 +78,20 @@ export default function Game() {
     }
   }, [user]);
 
+  // Handle return from Stripe checkout
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      const tryRefresh = (n = 0) => {
+        refreshUnlock();
+        if (n < 6) setTimeout(() => tryRefresh(n + 1), 1000);
+      };
+      tryRefresh();
+      window.history.replaceState({}, '', window.location.pathname);
+      setShowCheckout(false);
+    }
+  }, [refreshUnlock]);
+
   const resumeGame = useCallback(() => {
     const s = loadSave();
     if (s) {
