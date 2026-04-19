@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import CharacterSelect from './CharacterSelect';
 import GameStore from './GameStore';
 import GameCanvas from './GameCanvas';
+import { UnlockCheckout } from './UnlockCheckout';
+import { useUnlock } from '@/hooks/useUnlock';
 
 const SAVE_KEY = 'laser-dash-save';
 
@@ -43,6 +45,8 @@ async function syncProgressToDb(userId: string, gems: number, level: number) {
 
 export default function Game() {
   const { user, signOut } = useAuth();
+  const { unlocked, refresh: refreshUnlock } = useUnlock();
+  const [showCheckout, setShowCheckout] = useState(false);
   const [screen, setScreen] = useState<Screen>('title');
   const [character, setCharacter] = useState<Character | null>(null);
   const [level, setLevel] = useState(1);
@@ -119,13 +123,18 @@ export default function Game() {
   }, [gems, level, character, backgrounds, user]);
 
   const handleNextLevel = useCallback(() => {
+    // Gate: after completing level 2, require unlock to play level 3+
+    if (level >= 2 && !unlocked) {
+      setShowCheckout(true);
+      return;
+    }
     setLevel((l) => l + 1);
     setHearts(1);
     setHasShield(false);
     setHeartBought(false);
     setShieldBought(false);
     setScreen('store');
-  }, []);
+  }, [level, unlocked]);
 
   const handlePause = useCallback(() => {
     if (character) {
