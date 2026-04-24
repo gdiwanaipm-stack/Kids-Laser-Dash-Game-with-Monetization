@@ -2,11 +2,17 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { lovable } from '@/integrations/lovable';
 import { Navigate } from 'react-router-dom';
+import { isInAppBrowser, getInAppBrowserName } from '@/lib/inAppBrowser';
 
 export default function Login() {
   const { user, loading } = useAuth();
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const inApp = isInAppBrowser();
+  const appName = getInAppBrowserName();
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   if (loading) {
     return (
@@ -33,18 +39,63 @@ export default function Login() {
     }
   };
 
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setError("Couldn't copy — long-press the address bar to copy the URL.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 bg-background">
       <h1 className="game-title">Laser Dash</h1>
       <p className="text-xl text-muted-foreground text-center max-w-md">
         Sign in to save your progress, track gems, and compete! 🏆
       </p>
+
+      {inApp && (
+        <div className="game-card w-80 p-6 border-2 border-destructive/40 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">⚠️</span>
+            <h2 className="text-lg font-bold">Open in your browser</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Google sign-in doesn't work inside {appName}. Please open this page in {isIOS ? 'Safari' : 'Chrome'} to continue.
+          </p>
+          <button
+            onClick={handleCopyLink}
+            className="game-btn w-full"
+          >
+            {copied ? '✅ Link copied!' : '📋 Copy link'}
+          </button>
+          <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+            {isIOS ? (
+              <>
+                <li>Tap the <strong>•••</strong> menu (top right)</li>
+                <li>Choose <strong>"Open in Safari"</strong> or <strong>"Open in browser"</strong></li>
+                <li>If unavailable, paste the copied link into Safari</li>
+              </>
+            ) : (
+              <>
+                <li>Tap the <strong>⋮</strong> menu (top right)</li>
+                <li>Choose <strong>"Open in Chrome"</strong> or <strong>"Open in external browser"</strong></li>
+                <li>If unavailable, paste the copied link into Chrome</li>
+              </>
+            )}
+          </ol>
+        </div>
+      )}
+
       <div className="game-card flex flex-col items-center gap-6 w-80 p-8">
         <div className="text-6xl float-animation">🏎️</div>
         <button
           onClick={handleGoogleSignIn}
-          disabled={signingIn}
-          className="game-btn w-full flex items-center justify-center gap-3"
+          disabled={signingIn || inApp}
+          className="game-btn w-full flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={inApp ? `Open in ${isIOS ? 'Safari' : 'Chrome'} first` : undefined}
         >
           {signingIn ? (
             <span className="animate-spin">⏳</span>
