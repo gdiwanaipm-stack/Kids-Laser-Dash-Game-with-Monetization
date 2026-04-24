@@ -69,9 +69,12 @@ serve(async (req) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     console.error("create-checkout error:", msg);
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Checkout session could not be created. Please try again." }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
