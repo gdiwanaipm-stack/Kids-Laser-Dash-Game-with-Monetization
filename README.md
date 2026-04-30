@@ -1,6 +1,6 @@
 # Laser Dash 🏎️⚡
 
-> An AI-powered laser obstacle game built for elementary kids — created by a father and son team.
+> An AI-powered laser obstacle game built for elementary kids — created by a son and mother team. Created by a 4th grader with his rules and power-ups.
 
 **[Play Live →](https://laser-dash.lovable.app)**
 
@@ -10,7 +10,7 @@
 
 Laser Dash is a fast-paced side-scrolling game where players dodge AI-generated laser death traps and collect gems as they race through 5 increasingly intense levels. The further you get, the smarter and more unpredictable the lasers become. Power-ups help you survive — but you have to earn them.
 
-Built with ❤️ by a dad and his kid as a fun project to explore game development and AI together.
+Built with ❤️ by a kid and his mom as a fun project to explore game development and AI together.
 
 ---
 
