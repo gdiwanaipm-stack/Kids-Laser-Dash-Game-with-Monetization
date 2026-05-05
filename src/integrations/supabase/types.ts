@@ -127,7 +127,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      sync_game_progress: {
+        Args: { p_gems: number; p_level: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

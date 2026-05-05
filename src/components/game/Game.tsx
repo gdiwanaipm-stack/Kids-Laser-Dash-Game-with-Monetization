@@ -27,21 +27,8 @@ function clearSave() {
   localStorage.removeItem(SAVE_KEY);
 }
 
-async function syncProgressToDb(userId: string, gems: number, level: number) {
-  const { data } = await supabase
-    .from('profiles')
-    .select('gems, highest_level')
-    .eq('user_id', userId)
-    .single();
-
-  if (data) {
-    const updates: Record<string, number> = {};
-    if (gems > data.gems) updates.gems = gems;
-    if (level > data.highest_level) updates.highest_level = level;
-    if (Object.keys(updates).length > 0) {
-      await supabase.from('profiles').update(updates).eq('user_id', userId);
-    }
-  }
+async function syncProgressToDb(_userId: string, gems: number, level: number) {
+  await supabase.rpc('sync_game_progress', { p_gems: gems, p_level: level });
 }
 
 export default function Game() {
