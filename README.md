@@ -207,4 +207,4 @@ npx playwright test   # E2E tests (Playwright)
 
 ---
 
-*Made with love by a dad and his kid. 🏎️⚡*
+*Made with love by a mom and her kid. 🏎️⚡*
