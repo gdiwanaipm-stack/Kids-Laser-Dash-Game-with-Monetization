@@ -9,6 +9,7 @@ import GameStore from './GameStore';
 import GameCanvas from './GameCanvas';
 import { UnlockCheckout } from './UnlockCheckout';
 import { useUnlock } from '@/hooks/useUnlock';
+import { logGameEvent } from '@/lib/gameEvents';
 
 const SAVE_KEY = 'laser-dash-save';
 
