@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      game_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          level: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          level: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          level?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       game_unlocks: {
         Row: {
           created_at: string
@@ -127,6 +151,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_funnel_stats: {
+        Args: never
+        Returns: {
+          completed: number
+          deaths: number
+          level: number
+          reached: number
+          restarts: number
+          started: number
+        }[]
+      }
       sync_game_progress: {
         Args: { p_gems: number; p_level: number }
         Returns: undefined
