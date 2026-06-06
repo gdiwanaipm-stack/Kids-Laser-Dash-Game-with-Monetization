@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useIsTouchDevice } from '@/hooks/use-mobile';
 import { Character, Background, CHARACTER_EMOJI, LEVEL_CONFIGS, BG_COLORS } from '@/lib/gameTypes';
 import { playCollect, playHit, playWin } from '@/lib/gameAudio';
+import { logGameEvent } from '@/lib/gameEvents';
 
 interface Props {
   level: number;
@@ -57,6 +58,10 @@ export default function GameCanvas({ level, character, background, hearts: initH
     frame: 0,
     startCountdown: 180, // 3 seconds
   });
+
+  useEffect(() => {
+    logGameEvent('level_start', level);
+  }, [level]);
 
   const config = LEVEL_CONFIGS[level - 1];
   const colors = BG_COLORS[background];
@@ -204,6 +209,8 @@ export default function GameCanvas({ level, character, background, hearts: initH
               playHit();
               s.hearts--;
               if (s.hearts <= 0) {
+                logGameEvent('death', level);
+                logGameEvent('restart', level);
                 restart();
                 break;
               } else {

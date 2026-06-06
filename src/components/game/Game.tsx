@@ -9,6 +9,7 @@ import GameStore from './GameStore';
 import GameCanvas from './GameCanvas';
 import { UnlockCheckout } from './UnlockCheckout';
 import { useUnlock } from '@/hooks/useUnlock';
+import { logGameEvent } from '@/lib/gameEvents';
 
 const SAVE_KEY = 'laser-dash-save';
 
@@ -137,6 +138,7 @@ export default function Game() {
   const handleLevelComplete = useCallback((gemsCollected: number) => {
     const newGems = gems + gemsCollected + 10;
     setGems(newGems);
+    logGameEvent('level_complete', level);
     if (level >= 5) {
       setScreen('gameComplete');
       clearSave();
