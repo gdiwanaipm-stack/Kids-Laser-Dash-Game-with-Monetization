@@ -59,6 +59,10 @@ export default function GameCanvas({ level, character, background, hearts: initH
     startCountdown: 180, // 3 seconds
   });
 
+  useEffect(() => {
+    logGameEvent('level_start', level);
+  }, [level]);
+
   const config = LEVEL_CONFIGS[level - 1];
   const colors = BG_COLORS[background];
 
