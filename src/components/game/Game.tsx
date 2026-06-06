@@ -138,6 +138,7 @@ export default function Game() {
   const handleLevelComplete = useCallback((gemsCollected: number) => {
     const newGems = gems + gemsCollected + 10;
     setGems(newGems);
+    logGameEvent('level_complete', level);
     if (level >= 5) {
       setScreen('gameComplete');
       clearSave();
